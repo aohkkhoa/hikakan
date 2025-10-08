@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random chữ Nhật</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f4f8;
+      margin: 0;
+    }
+    .wrap {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 { margin-top: 0; }
+    .output {
+      margin: 20px 0;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 8px;
+      color: #2b6cb0;
+      white-space: pre-line;
+    }
+    .answer {
+      margin: 10px 0;
+      font-size: 22px;
+      font-weight: bold;
+      color: #e63946;
+      display: none;
+      white-space: pre-line;
+    }
+    .btns {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #2b6cb0;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #1a4f80; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Random chữ Nhật</h1>
+    <p>Bấm Space để chọn chữ, Enter để xem đáp án.</p>
+
+    <div id="modeDisplay" style="margin-bottom:10px; font-weight:bold; color:#444;">
+      🅰️ Chế độ: Romaji → Nhật
+    </div>
+
+    <div id="output" class="output">---</div>
+    <div id="answer" class="answer">Đáp án: </div>
+
+    <div class="btns">
+      <button id="modeBtn" type="button">Chuyển sang Nhật → Romaji</button>
+      <button id="btn" type="button">Chọn chữ (Space)</button>
+      <button id="ansBtn" type="button">Hiển thị đáp án (Enter)</button>
+    </div>
+  </div>
+
+  <script>
+    const letters = [
+      /* --- Hàng A あ行 --- */
+      {romaji:'a', hira:'あ', kata:'ア'},
+      {romaji:'i', hira:'い', kata:'イ'},
+      {romaji:'u', hira:'う', kata:'ウ'},
+      {romaji:'e', hira:'え', kata:'エ'},
+      {romaji:'o', hira:'お', kata:'オ'},
+
+      /* --- Hàng KA か行 --- */
+      {romaji:'ka', hira:'か', kata:'カ'},
+      {romaji:'ki', hira:'き', kata:'キ'},
+      {romaji:'ku', hira:'く', kata:'ク'},
+      {romaji:'ke', hira:'け', kata:'ケ'},
+      {romaji:'ko', hira:'こ', kata:'コ'},
+
+      /* --- Hàng SA さ行 --- */
+      {romaji:'sa', hira:'さ', kata:'サ'},
+      {romaji:'shi', hira:'し', kata:'シ'},
+      {romaji:'su', hira:'す', kata:'ス'},
+      {romaji:'se', hira:'せ', kata:'セ'},
+      {romaji:'so', hira:'そ', kata:'ソ'},
+
+      /* --- Hàng TA た行 --- */
+      {romaji:'ta', hira:'た', kata:'タ'},
+      {romaji:'chi', hira:'ち', kata:'チ'},
+      {romaji:'tsu', hira:'つ', kata:'ツ'},
+      {romaji:'te', hira:'て', kata:'テ'},
+      {romaji:'to', hira:'と', kata:'ト'},
+
+      /* --- Hàng NA な行 --- */
+      {romaji:'na', hira:'な', kata:'ナ'},
+      {romaji:'ni', hira:'に', kata:'ニ'},
+      {romaji:'nu', hira:'ぬ', kata:'ヌ'},
+      {romaji:'ne', hira:'ね', kata:'ネ'},
+      {romaji:'no', hira:'の', kata:'ノ'},
+
+      /* --- Hàng HA は行 --- */
+      {romaji:'ha', hira:'は', kata:'ハ'},
+      {romaji:'hi', hira:'ひ', kata:'ヒ'},
+      {romaji:'fu', hira:'ふ', kata:'フ'}, // đọc như "fu", viết là ふ
+      {romaji:'he', hira:'へ', kata:'ヘ'},
+      {romaji:'ho', hira:'ほ', kata:'ホ'},
+
+      /* --- Hàng MA ま行 --- 
+      {romaji:'ma', hira:'ま', kata:'マ'},
+      {romaji:'mi', hira:'み', kata:'ミ'},
+      {romaji:'mu', hira:'む', kata:'ム'},
+      {romaji:'me', hira:'め', kata:'メ'},
+      {romaji:'mo', hira:'も', kata:'モ'},*/
+
+      /* --- Hàng YA や行 --- 
+      {romaji:'ya', hira:'や', kata:'ヤ'},
+      {romaji:'yu', hira:'ゆ', kata:'ユ'},
+      {romaji:'yo', hira:'よ', kata:'ヨ'}, */
+
+      /* --- Hàng RA ら行 --- 
+      {romaji:'ra', hira:'ら', kata:'ラ'},
+      {romaji:'ri', hira:'り', kata:'リ'},
+      {romaji:'ru', hira:'る', kata:'ル'},
+      {romaji:'re', hira:'れ', kata:'レ'},
+      {romaji:'ro', hira:'ろ', kata:'ロ'},*/
+
+      /* --- Hàng WA わ行 ---
+      {romaji:'wa', hira:'わ', kata:'ワ'},
+      {romaji:'wo', hira:'を', kata:'ヲ'}, // thường đọc là "o" trong từ 「を」  */
+
+      /* --- Âm N ん --- 
+      {romaji:'n', hira:'ん', kata:'ン'} */
+    ];
+
+    let currentPicked = [];
+    let mode = 'romajiToJapan'; // hoặc 'japanToRomaji'
+
+    function pickRandom(arr, count) {
+      const copy = [...arr];
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const idx = Math.floor(Math.random() * copy.length);
+        result.push(copy[idx]);
+        copy.splice(idx, 1);
+      }
+      return result;
+    }
+
+    function pickLetters() {
+      const count = mode === 'romajiToJapan' ? 6 : 10;
+      const result = pickRandom(letters, count);
+      currentPicked = result;
+      const out = document.getElementById('output');
+      const ans = document.getElementById('answer');
+      ans.style.display = 'none';
+
+      if (mode === 'romajiToJapan') {
+        // Hiển thị 3 chữ Romaji
+        out.textContent = result.map(r => r.romaji).join(' ');
+      } else {
+        // Hiển thị 10 chữ Nhật (5 trên, 5 dưới) — trộn giữa hira và kata
+        const mix = result.map(r => (Math.random() < 0.5 ? r.hira : r.kata));
+        const top = mix.slice(0, 5).join(' ');
+        const bottom = mix.slice(5).join(' ');
+        out.innerHTML = `${top}<br>${bottom}`;
+      }
+
+      document.getElementById('btn').blur();
+    }
+
+    function showAnswer() {
+      if (currentPicked.length === 0) return;
+      const ans = document.getElementById('answer');
+      let text = '';
+
+      if (mode === 'romajiToJapan') {
+        const hira = currentPicked.map(r => r.hira).join(' ');
+        const kata = currentPicked.map(r => r.kata).join(' ');
+        text = 'Đáp án:\nHiragana: ' + hira + '\nKatakana: ' + kata;
+      } else {
+        // Chia romaji 5 trên, 5 dưới, có dấu gạch để dễ nhìn
+        const romaji = currentPicked.map(r => r.romaji);
+        const top = romaji.slice(0, 5).join(' _ _ ');
+        const bottom = romaji.slice(5).join(' _ _ _');
+        text = `Đáp án:\n${top}\n${bottom}`;
+      }
+
+      ans.textContent = text;
+      ans.style.display = 'block';
+      document.getElementById('ansBtn').blur();
+    }
+
+    // Nút chuyển chế độ
+    document.getElementById('modeBtn').addEventListener('click', () => {
+      const modeText = document.getElementById('modeDisplay');
+      if (mode === 'romajiToJapan') {
+        mode = 'japanToRomaji';
+        modeText.textContent = '🇯🇵 Chế độ: Nhật → Romaji';
+        document.getElementById('modeBtn').textContent = 'Chuyển sang Romaji → Nhật';
+      } else {
+        mode = 'romajiToJapan';
+        modeText.textContent = '🅰️ Chế độ: Romaji → Nhật';
+        document.getElementById('modeBtn').textContent = 'Chuyển sang Nhật → Romaji';
+      }
+      document.getElementById('output').textContent = '---';
+      document.getElementById('answer').style.display = 'none';
+    });
+
+    // Sự kiện click các nút
+    document.getElementById('btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      pickLetters();
+    });
+
+    document.getElementById('ansBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      showAnswer();
+    });
+
+    // Sự kiện bàn phím
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        pickLetters();
+      } else if (e.code === 'Enter') {
+        e.preventDefault();
+        showAnswer();
+      }
+    });
+  </script>
+</body>
+</html>
